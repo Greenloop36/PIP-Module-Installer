@@ -421,7 +421,11 @@ if IsUpdateAvailable:
 
 while True:
     ## Input
-    inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
+    try:
+        inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
+    except KeyboardInterrupt:
+        CustomException("\nQuitting...")
+        sys.exit(0)
 
     ## Ignore Blank
     if inp == "" or inp.startswith(" "):
