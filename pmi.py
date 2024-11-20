@@ -178,7 +178,8 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
     else:
         return False, None
 
-
+def Terminate(): # User initiated exits
+    sys.exit(0)
 
 def Update():
     DownloadCache = {}
@@ -305,7 +306,7 @@ class Container_Commands:
         ClearWindow()
     
     def exit(*args):
-        sys.exit(0)
+        Terminate()
     
     def list(*args):
         ## variables
@@ -427,8 +428,11 @@ while True:
     try:
         inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
     except KeyboardInterrupt:
-        CustomException("\nQuitting...")
-        sys.exit(0)
+        CustomException("\nKeyboard Interruption: Quitting...")
+        Terminate()
+    except EOFError:
+        CustomException("\nEnd of File: Quitting...")
+        Terminate()
 
     ## Ignore Blank
     if inp == "" or inp.startswith(" "):
