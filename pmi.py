@@ -105,6 +105,8 @@ for module in required_modules:
     else:
         print("installed")
 
+ClearWindow()
+
 # Install required modules (if necessary)
 if len(init_modules_to_install) > 0:
     print(f"\nThe required modules will now be installed automatically.")
