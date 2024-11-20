@@ -1,7 +1,10 @@
 # module installer
 
 ## Configuration
-required_modules = ["colorama"]
+required_modules = ["colorama", "requests"]
+
+BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
+FilesToInstall = ["pmi.py", "Version.txt"]
 ThisVersion = "2.0"
 
 ### init
@@ -11,6 +14,18 @@ import subprocess
 import os
 
 ## Core Methods
+def YesNo(prompt: str = None) -> bool:
+    print(prompt,"(Y/n)")
+
+    while True:
+        selection: str = input("> ")
+        selection = selection.lower()
+
+        if selection == "y":
+            return True
+        elif selection == "n":
+            return False
+
 def InstallModule(Name: str) -> tuple[bool, str, int]:
     result = subprocess.run(['cmd', '/c', f'pip install {Name}'], shell=True, capture_output=True, text=True)
 
@@ -118,6 +133,7 @@ ClearWindow()
 import colorama
 from colorama import Fore, Back, Style
 import json
+import requests
 
 ## init
 colorama.init(autoreset = True)
@@ -139,6 +155,89 @@ def PrintList(List: list):
     for i in List:
         print("\t| " + str(i))
 
+def GetFileFromRepo(FileName) -> tuple[bool, str]:
+    Response = requests.get(BaseURL +  FileName)
+
+    if Response.status_code == 200: # Success
+        return True, Response.text
+    else: # Failure
+        #print(Response)
+        return False, f"HTTP {Response.status_code} ({Response.reason})"
+
+def Update():
+    DownloadCache = {}
+    LatestVersion = None
+
+    def CancelInstall(Message: str | None = None):
+        DownloadCache.clear()
+        DownloadCache = None
+
+        if Message:
+            CustomException(f"Update cancelled: {Message}")
+        else:
+            CustomException("Update cancelled.")
+
+    print("Preparing to update...")
+
+    ## Get latest version
+    Success, Result = GetFileFromRepo("Version.txt")
+
+    if not Success:
+        Error(f"Could not retrieve latest version! ({Result})")
+        CancelInstall()
+        return
+    elif Result == ThisVersion:
+        return CancelInstall(f"This version, {ThisVersion}, is already the latest available version for PIP Module Installer.")
+    
+    LatestVersion = Result
+    
+    ## Install files
+    print("\Downloading files...")
+    for File in FilesToInstall:
+        print(f"\t| downloading \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
+        Success, Result = GetFileFromRepo(File)
+
+        if Success:
+            DownloadCache[File] = Result
+            print(f"{Fore.GREEN}OK{Fore.RESET}")
+        else:
+            print(f"{Fore.LIGHTRED_EX}FAIL!{Fore.RESET}")
+            return CancelInstall(f"Failed to install \"{File}\"! ({Result})")
+    print("Download successful.")
+    
+    print("\nRemoving old installation...")
+    for File in FilesToInstall:
+        print(f"\t| removing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
+
+        try:
+            os.remove(File)
+        except FileNotFoundError:
+            print(f"{Fore.YELLOW}NOT FOUND{Fore.RESET}")
+        except PermissionError:
+            print(f"{Fore.LIGHTRED_EX}FAIL!{Fore.RESET}")
+            return CancelInstall(f"Failed to remove the file \"{File}\" because the application has insufficient permissions. Try running in administrator mode.")
+        else:
+            print(f"{Fore.GREEN}OK{Fore.RESET}")
+    print("Old installation files were removed successfully.")
+
+    print("\nInstalling new files...")
+    for Name, Content in DownloadCache.items():
+        print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
+        
+        try:
+            File = open(Name, "w")
+            File.write(Content)
+            File.close()
+        except Exception as e:
+            print(f"{Fore.LIGHTRED_EX}FAIL!{Fore.RESET}")
+            return CancelInstall(f"Failed to install the file \"{File}\"!\n{e}")
+        else:
+            print(f"{Fore.GREEN}OK{Fore.RESET}")
+    
+    print("Installation successful.")
+    Notice(f"PIP Module Installer has been updated to Release {LatestVersion}. Please restart the application.")
+    Quit("Update successful. Please restart the application.")
+        
 ## commands
 class Container_Commands:
     def install(*args):
@@ -280,6 +379,11 @@ class Container_Commands:
     def verify(*args):
         print("Verifying the integrity of installed modules...\n")
         subprocess.run(f"pip check")
+    
+    def update(*args):
+        if YesNo("Do you want to update PIP Module Installer?"):
+            print()
+            Update()
 
 ## Main
 Commands = Container_Commands()
