@@ -293,7 +293,7 @@ class Container_Commands:
             Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
     
         else:
-            if Result.stderr.find("WARNING"):
+            if Result.stderr.find("WARNING") != -1:
                 print(f"{Fore.YELLOW} NOT FOUND")
             else:
                 print(f"{Fore.GREEN} OK")
