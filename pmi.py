@@ -2,6 +2,7 @@
 
 ## Configuration
 required_modules = ["colorama"]
+ThisVersion = "2.0"
 
 ### init
 print("initialising...")
