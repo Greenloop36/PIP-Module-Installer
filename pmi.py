@@ -236,7 +236,7 @@ def Update():
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
     print("Installation successful.\n")
-    Quit(f"PIP Module Installer has been updated to Release {LatestVersion}. Please restart the application.")
+    Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
         
 ## commands
 class Container_Commands:
@@ -268,11 +268,18 @@ class Container_Commands:
             return Error("Missing required argument #1 (ModuleName)!")
         
         ## uninstall
-        Result = subprocess.run(f"pip uninstall {ModuleName}")
+        print(f"\tRemoving {Fore.BLUE}{ModuleName}{Fore.RESET}...", end = "")
+        Result = subprocess.run(['cmd', '/c', f'pip uninstall {ModuleName} --yes'], shell=True, capture_output=True, text=True)
+        #Result = subprocess.run(f"pip uninstall {ModuleName}")
 
         ## result
         if Result.returncode != 0:
-            Error(f"Failed to remove {Fore.BLUE}{ModuleName}{Fore.RESET}! (Exit code {Result.returncode})")
+            #Error(f"Failed to remove {Fore.BLUE}{ModuleName}{Fore.RESET}! (Exit code {Result.returncode})")
+            print(f"{Fore.RED} FAILED\n")
+            Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
+    
+        else:
+            print(f"{Fore.GREEN} OK")
 
     def clear(*args):
         ClearWindow()
