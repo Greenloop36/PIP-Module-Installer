@@ -5,7 +5,7 @@ required_modules = ["colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt"]
-ThisVersion = "2.0"
+ThisVersion = "2.1"
 
 ### init
 print("initialising...")
@@ -176,7 +176,8 @@ def Update():
             CustomException(f"Update cancelled: {Message}")
         else:
             CustomException("Update cancelled.")
-
+    
+    ClearWindow()
     print("Preparing to update...")
 
     ## Get latest version
@@ -192,7 +193,7 @@ def Update():
     LatestVersion = Result
     
     ## Install files
-    print("\Downloading files...")
+    print("\nDownloading files...")
     for File in FilesToInstall:
         print(f"\t| downloading \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
         Success, Result = GetFileFromRepo(File)
@@ -222,7 +223,7 @@ def Update():
 
     print("\nInstalling new files...")
     for Name, Content in DownloadCache.items():
-        print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
+        print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{Name}{Fore.RESET}\": ", end = "")
         
         try:
             File = open(Name, "w")
@@ -234,9 +235,8 @@ def Update():
         else:
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
-    print("Installation successful.")
-    Notice(f"PIP Module Installer has been updated to Release {LatestVersion}. Please restart the application.")
-    Quit("Update successful. Please restart the application.")
+    print("Installation successful.\n")
+    Quit(f"PIP Module Installer has been updated to Release {LatestVersion}. Please restart the application.")
         
 ## commands
 class Container_Commands:
@@ -387,7 +387,7 @@ class Container_Commands:
 
 ## Main
 Commands = Container_Commands()
-print("PIP Module Installer [Version 2.0]\n")
+print(f"PIP Module Installer [Version {ThisVersion}]\n")
 
 while True:
     ## Input
