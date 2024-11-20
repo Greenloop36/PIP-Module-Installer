@@ -170,11 +170,11 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
     if Success:
         Result = Result.replace("\n", "")
         if Result == ThisVersion:
-            return False
+            return False, None
         else:
             return True, Result
     else:
-        return False
+        return False, None
 
 
 
