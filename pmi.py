@@ -196,12 +196,13 @@ def Update():
 
     ## Get latest version
     Success, Result = GetFileFromRepo("Version.txt")
+    LatestVersion = Result.replace("\n", "")
 
     if not Success:
         Error(f"Could not retrieve latest version! ({Result})")
         CancelInstall()
         return
-    elif Result == ThisVersion:
+    elif LatestVersion == ThisVersion:
         return CancelInstall(f"This version, {ThisVersion}, is already the latest available version for PIP Module Installer.")
     
     LatestVersion = Result.replace("\n", "")
