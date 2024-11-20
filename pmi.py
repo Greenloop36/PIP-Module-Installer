@@ -164,6 +164,20 @@ def GetFileFromRepo(FileName) -> tuple[bool, str]:
         #print(Response)
         return False, f"HTTP {Response.status_code} ({Response.reason})"
 
+def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update is available) OR False (if no update or if GET failed)
+    Success, Result = GetFileFromRepo("Version.txt")
+
+    if Success:
+        Result = Result.replace("\n", "")
+        if Result == ThisVersion:
+            return False
+        else:
+            return True, Result
+    else:
+        return False
+
+
+
 def Update():
     DownloadCache = {}
     LatestVersion = None
@@ -190,7 +204,7 @@ def Update():
     elif Result == ThisVersion:
         return CancelInstall(f"This version, {ThisVersion}, is already the latest available version for PIP Module Installer.")
     
-    LatestVersion = Result
+    LatestVersion = Result.replace("\n", "")
     
     ## Install files
     print("\nDownloading files...")
@@ -393,8 +407,14 @@ class Container_Commands:
             Update()
 
 ## Main
+print("Checking for updates...")
+IsUpdateAvailable, NewVersion = CheckForUpdates()
+
 Commands = Container_Commands()
+ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]\n")
+if IsUpdateAvailable:
+    Notice(f"An update is available ({Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
 while True:
     ## Input
