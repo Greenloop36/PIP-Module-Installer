@@ -179,13 +179,15 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
         return False, None
 
 def Terminate(): # User initiated exits
+    CustomException("Quitting...")
     sys.exit(0)
 
-def Update():
+def Update(Force: bool = False):
     DownloadCache = {}
     LatestVersion = None
 
     def CancelInstall(Message: str | None = None):
+        nonlocal DownloadCache
         DownloadCache.clear()
         DownloadCache = None
 
@@ -194,7 +196,6 @@ def Update():
         else:
             CustomException("Update cancelled.")
     
-    ClearWindow()
     print("Preparing to update...")
 
     ## Get latest version
@@ -205,12 +206,13 @@ def Update():
         Error(f"Could not retrieve latest version! ({Result})")
         CancelInstall()
         return
-    elif LatestVersion == ThisVersion:
-        return CancelInstall(f"This version, {ThisVersion}, is already the latest available version for PIP Module Installer.")
+    elif LatestVersion == ThisVersion and not Force:
+        return CancelInstall(f"This version, {ThisVersion}, is already the latest available installation for PIP Module Installer.")
     
     LatestVersion = Result.replace("\n", "")
     
-    ## Install files
+    ## Download files
+    ClearWindow()
     print("\nDownloading files...")
     for File in FilesToInstall:
         print(f"\t| downloading \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
@@ -224,6 +226,7 @@ def Update():
             return CancelInstall(f"Failed to install \"{File}\"! ({Result})")
     print("Download successful.")
     
+    ## Remove old files
     print("\nRemoving old installation...")
     for File in FilesToInstall:
         print(f"\t| removing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
@@ -239,6 +242,7 @@ def Update():
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     print("Old installation files were removed successfully.")
 
+    ## Replace with new files
     print("\nInstalling new files...")
     for Name, Content in DownloadCache.items():
         print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{Name}{Fore.RESET}\": ", end = "")
@@ -253,6 +257,7 @@ def Update():
         else:
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
+    ## Finish
     print("Installation successful.\n")
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
         
@@ -409,9 +414,12 @@ class Container_Commands:
         subprocess.run(f"pip check")
     
     def update(*args):
-        if YesNo("Do you want to update PIP Module Installer?"):
-            print()
-            Update()
+        if args[1] == "--force" or args[1] == "-f":
+            Update(True)
+        else:
+            if YesNo("Do you want to update PIP Module Installer?"):
+                print()
+                Update()
 
 ## Main
 print("Checking for updates...")
@@ -428,10 +436,10 @@ while True:
     try:
         inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
     except KeyboardInterrupt:
-        CustomException("\nKeyboard Interruption: Quitting...")
+        CustomException("\nKeyboard Interruption")
         Terminate()
     except EOFError:
-        CustomException("\nEnd of File: Quitting...")
+        CustomException("\nEnd of File")
         Terminate()
 
     ## Ignore Blank
@@ -447,12 +455,12 @@ while True:
     
     ## Execute Command
     if callable(Method):
-        Method(args)
+        #Method(args)
         try:
-            pass
+            Method(args)
         except Exception as e:
             print()
-            Error(f"An exception occurred when processing the command {Fore.BLUE}{command}{Fore.RESET}!\n{Style.DIM}{e}{Style.RESET_ALL}")
+            CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.RED}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
         CustomException(f"\"{command}\" is not recognised as an internal command.\n Use the \"list commands\" command to view the available commands.")
 
