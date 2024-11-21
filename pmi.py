@@ -12,6 +12,7 @@ print("initialising...")
 import sys
 import subprocess
 import os
+import webbrowser
 
 ## Core Methods
 def YesNo(prompt: str = None) -> bool:
@@ -420,6 +421,10 @@ class Container_Commands:
             if YesNo("Do you want to update PIP Module Installer?"):
                 print()
                 Update()
+    
+    def releases(*args):
+        Notice(f"Redirecting to: \"{Fore.LIGHTBLUE_EX}https://github.com/Greenloop36/PIP-Module-Installer/releases{Fore.RESET}\"...")
+        webbrowser.open("https://github.com/Greenloop36/PIP-Module-Installer/releases")
 
 ## Main
 print("Checking for updates...")
