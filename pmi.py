@@ -5,7 +5,7 @@ required_modules = ["colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt", "README.md"]
-ThisVersion = "2.1"
+ThisVersion = "2.1.1"
 
 ### init
 print("initialising...")
@@ -93,6 +93,15 @@ def Settings_Set(Key: str, Value: any):
 #     print("\t| file already exists, continuing.")
 # except Exception as e:
 #     Quit(f"(Fatal error!) Could not create the settings file.\n{e}")
+
+print("getting current version...")
+try:
+    nonlocal ThisVersion
+    File = open("Version.txt")
+    
+    ThisVersion = File.read().replace("\n", "")
+except:
+
 
 init_modules_to_install = []
 print("checking dependencies...")
