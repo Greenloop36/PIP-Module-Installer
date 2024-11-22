@@ -94,13 +94,13 @@ def Settings_Set(Key: str, Value: any):
 # except Exception as e:
 #     Quit(f"(Fatal error!) Could not create the settings file.\n{e}")
 
-print("getting current version...")
-try:
-    nonlocal ThisVersion
-    File = open("Version.txt")
+# print("getting current version...")
+# try:
+#     #nonlocal ThisVersion
+#     File = open("Version.txt")
     
-    ThisVersion = File.read().replace("\n", "")
-except:
+#     ThisVersion = File.read().replace("\n", "")
+# except:
 
 
 init_modules_to_install = []
