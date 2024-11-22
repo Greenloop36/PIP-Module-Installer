@@ -131,6 +131,7 @@ ClearWindow()
 ##########################################
 ## MAIN
 ##########################################
+print("starting...")
 
 ## variables
 import colorama
@@ -271,42 +272,60 @@ class Container_Commands:
         ## check
         if ModuleName == "":
             return Error("Missing required argument #1 (ModuleName)!")
-
+        
         ## install
-        print(f"\tInstalling {Fore.BLUE}{str(ModuleName)}{Fore.RESET}...", end = "")
-        Success, Result, ExitCode = InstallModule(ModuleName)
+        ModulesToInstall = ModuleName.split(",")
+        ModuleCount = len(ModulesToInstall)
 
-        ## result
-        if Success:
-            print(f"{Fore.GREEN} OK")
+        if ModuleCount > 1:
+            print(f"Installing {ModuleCount} packages...")
         else:
-            print(f"{Fore.RED} FAILED\n")
-            Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+            print("Installing 1 package:")
+
+        for Module in ModulesToInstall:
+            Module = Module.replace(" ", "")
+            print(f"\tInstalling {Fore.BLUE}{str(Module)}{Fore.RESET}...", end = "")
+            Success, Result, ExitCode = InstallModule(Module)
+
+            ## result
+            if Success:
+                print(f"{Fore.GREEN} OK")
+            else:
+                print(f"{Fore.RED} FAILED\n")
+                Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                print("\n")
     
     def uninstall(*args):
-        ## variables
         ModuleName = args[1]
 
         ## check
         if ModuleName == "":
             return Error("Missing required argument #1 (ModuleName)!")
         
-        ## uninstall
-        print(f"\tRemoving {Fore.BLUE}{ModuleName}{Fore.RESET}...", end = "")
-        Result = subprocess.run(['cmd', '/c', f'pip uninstall {ModuleName} --yes'], shell=True, capture_output=True, text=True)
-        #Result = subprocess.run(f"pip uninstall {ModuleName}")
+        ModulesToRemove = ModuleName.split(",")
+        ModuleCount = len(ModulesToRemove)
 
-        ## result
-        if Result.returncode != 0:
-            #Error(f"Failed to remove {Fore.BLUE}{ModuleName}{Fore.RESET}! (Exit code {Result.returncode})")
-            print(f"{Fore.RED} FAILED\n")
-            Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
-    
+        if ModuleCount == 1:
+            print("Removing 1 package...")
         else:
-            if Result.stderr.find("WARNING") != -1:
-                print(f"{Fore.YELLOW} NOT FOUND")
+            print(f"Removing {ModuleCount} packages...")
+
+        ## uninstall
+        for Module in ModulesToRemove:
+            Module = Module.replace(" ", "")
+            print(f"\tRemoving {Fore.BLUE}{Module}{Fore.RESET}:", end = "")
+            Result = subprocess.run(['cmd', '/c', f'pip uninstall {Module} --yes'], shell=True, capture_output=True, text=True)
+
+            ## result
+            if Result.returncode != 0:
+                print(f"{Fore.RED} FAILED\n")
+                Error(f"Failed to remove {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
+                print()
             else:
-                print(f"{Fore.GREEN} OK")
+                if Result.stderr.find("WARNING") != -1:
+                    print(f"{Fore.YELLOW} NOT FOUND")
+                else:
+                    print(f"{Fore.GREEN} OK")
 
     def clear(*args):
         ClearWindow()
@@ -340,17 +359,28 @@ class Container_Commands:
         ## check
         if ModuleName == "":
             return Error("Missing required argument #1 (ModuleName)!")
+        
+        ModulesToUpgrade = ModuleName.split(",")
+        ModuleCount = len(ModulesToUpgrade)
+
+        if ModuleCount == 1:
+            print("Upgrading 1 package...")
+        else:
+            print(f"Upgrading {ModuleCount} packages...")
 
         ## upgrade
-        print(f"\tUpdating {Fore.BLUE}{str(ModuleName)}{Fore.RESET}...", end = "")
-        Success, Result, ExitCode = InstallModule(f"-U {ModuleName}")
+        for Module in ModulesToUpgrade:
+            Module = Module.replace(" ", "")
 
-        ## result
-        if Success:
-            print(f"{Fore.GREEN} OK")
-        else:
-            print(f"{Fore.RED} FAILED\n")
-            Error(f"Failed to upgrade {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+            print(f"\tUpgrading {Fore.BLUE}{str(ModuleName)}{Fore.RESET}:", end = "")
+            Success, Result, ExitCode = InstallModule(f"-U {ModuleName}")
+
+            ## result
+            if Success:
+                print(f"{Fore.GREEN} OK")
+            else:
+                print(f"{Fore.RED} FAILED\n")
+                Error(f"Failed to upgrade {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
 
     def get(*args):
         ## variables
@@ -395,10 +425,16 @@ class Container_Commands:
         print()
     
     def runl(*args):
-        Notice("You are entering run loop mode.\n\t| \"exit\" to escape;\n\t| \"cls\" to clear the window.\n")
+        Notice("You are entering run loop mode.\n\t| \"exit\" OR Control+C to escape;\n\t| \"cls\" to clear the window.\n")
 
         while True:
-            cmd = input(f"{Fore.MAGENTA}${Fore.RESET} ")
+            try:
+                cmd = input(f"{Fore.MAGENTA}${Fore.RESET} ")
+            except KeyboardInterrupt:
+                break
+            except EOFError:
+                break
+
 
             if cmd.lower() == "exit":
                 break
@@ -465,7 +501,9 @@ while True:
             Method(args)
         except Exception as e:
             print()
-            CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.RED}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+            if e == None or e == "":
+                e = "Unknown exception"
+            CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
         CustomException(f"\"{command}\" is not recognised as an internal command.\n Use the \"list commands\" command to view the available commands.")
 
