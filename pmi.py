@@ -468,9 +468,9 @@ IsUpdateAvailable, NewVersion = CheckForUpdates()
 
 Commands = Container_Commands()
 ClearWindow()
-print(f"PIP Module Installer [Version {ThisVersion}]\n")
+print(f"PIP Module Installer [Version {ThisVersion}]")
 if IsUpdateAvailable:
-    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
+    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
 
 while True:
     ## Input
