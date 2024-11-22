@@ -131,6 +131,7 @@ ClearWindow()
 ##########################################
 ## MAIN
 ##########################################
+print("starting...")
 
 ## variables
 import colorama
