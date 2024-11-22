@@ -398,7 +398,13 @@ class Container_Commands:
         Notice("You are entering run loop mode.\n\t| \"exit\" to escape;\n\t| \"cls\" to clear the window.\n")
 
         while True:
-            cmd = input(f"{Fore.MAGENTA}${Fore.RESET} ")
+            try:
+                cmd = input(f"{Fore.MAGENTA}${Fore.RESET} ")
+            except KeyboardInterrupt:
+                break
+            except EOFError:
+                break
+
 
             if cmd.lower() == "exit":
                 break
