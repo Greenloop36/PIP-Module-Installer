@@ -395,7 +395,7 @@ class Container_Commands:
         print()
     
     def runl(*args):
-        Notice("You are entering run loop mode.\n\t| \"exit\" to escape;\n\t| \"cls\" to clear the window.\n")
+        Notice("You are entering run loop mode.\n\t| \"exit\" OR Control+C to escape;\n\t| \"cls\" to clear the window.\n")
 
         while True:
             try:
