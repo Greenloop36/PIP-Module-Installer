@@ -264,7 +264,7 @@ def Update(Force: bool = False):
             File.close()
         except Exception as e:
             print(f"{Fore.LIGHTRED_EX}FAIL!{Fore.RESET}")
-            return CancelInstall(f"Failed to install the file \"{File}\"!\n{e}")
+            return CancelInstall(f"Failed to install the file \"{Name}\"!\n{e}")
         else:
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
@@ -293,7 +293,7 @@ class Container_Commands:
 
         for Module in ModulesToInstall:
             Module = Module.replace(" ", "")
-            print(f"\tInstalling {Fore.BLUE}{str(Module)}{Fore.RESET}...", end = "")
+            print(f"\tInstalling {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
             Success, Result, ExitCode = InstallModule(Module)
 
             ## result
@@ -479,8 +479,9 @@ Commands = Container_Commands()
 ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
 if IsUpdateAvailable:
-    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
+    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
+print()
 while True:
     ## Input
     try:
