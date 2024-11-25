@@ -273,6 +273,18 @@ def Update(Force: bool = False):
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
         
 ## commands
+class Container_Debug:
+    def getdirs(*args):
+        print(f"Current working directory: {__file__}")
+        print(f"Name: {__name__}")
+    
+    def list(*args):
+        ToPrint = [attr for attr in dir(Debug) if callable(getattr(Debug, attr)) and not attr.startswith("__")]
+        print(f"list of debug commands:")
+        PrintList(ToPrint)
+
+Debug = Container_Debug()
+
 class Container_Commands:
     def install(*args):
         ## variables
@@ -470,7 +482,17 @@ class Container_Commands:
     def releases(*args):
         Notice(f"Redirecting to: \"{Fore.LIGHTBLUE_EX}https://github.com/Greenloop36/PIP-Module-Installer/releases{Fore.RESET}\"...")
         webbrowser.open("https://github.com/Greenloop36/PIP-Module-Installer/releases")
+    
+    def debug(*args):
+        Method = getattr(Debug, args[1], None)
 
+        if callable(Method):
+            try:
+                Method(args[1:])
+            except:
+                CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.BLUE}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+        else:
+            Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
 ## Main
 print("Checking for updates...")
 IsUpdateAvailable, NewVersion = CheckForUpdates()
