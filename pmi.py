@@ -1,7 +1,7 @@
 # module installer
 
 ## Configuration
-required_modules = ["colorama", "requests"]
+required_modules = ["pip", "colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt", "README.md"]
@@ -13,8 +13,23 @@ import sys
 import subprocess
 import os
 import webbrowser
+from time import sleep as wait
+
+DefaultTitle = "init"
 
 ## Core Methods
+def SetTitle(Title: str = None, Subtitle: str = None):
+    t = None
+    if Title:
+        t = Title
+    elif Subtitle:
+        t = f"{DefaultTitle}: {Subtitle}"
+    else:
+        t = DefaultTitle
+
+    sys.stdout.write(f"\x1b]2;{t}\x07")
+
+
 def YesNo(prompt: str = None) -> bool:
     print(prompt,"(Y/n)")
 
@@ -56,6 +71,7 @@ def Pause() -> None: # Wait for a key press
     os.system("pause")
 
 def Quit(Message: str | None = None):
+    SetTitle(Subtitle="Quit")
     if Message:
         print(f"\n{Message}")
     
@@ -104,6 +120,7 @@ def Settings_Set(Key: str, Value: any):
 
 
 init_modules_to_install = []
+#SetTitle(Subtitle="check dependencies")
 print("checking dependencies...")
 
 # Check required dependencies
@@ -118,6 +135,8 @@ for module in required_modules:
 ClearWindow()
 
 # Install required modules (if necessary)
+#SetTitle(Subtitle="install dependencies")
+wait(0.1)
 if len(init_modules_to_install) > 0:
     print(f"\nThe required modules will now be installed automatically.")
 
@@ -141,12 +160,16 @@ ClearWindow()
 ## MAIN
 ##########################################
 print("starting...")
+#SetTitle(Subtitle="starting")
 
 ## variables
 import colorama
 from colorama import Fore, Back, Style
 import json
 import requests
+
+Login = os.getlogin()
+DefaultTitle = f"PIP Module Installer [Version {ThisVersion}]"
 
 ## init
 colorama.init(autoreset = True)
@@ -190,10 +213,13 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
         return False, None
 
 def Terminate(): # User initiated exits
+    SetTitle(Subtitle="Quit")
     CustomException("Quitting...")
     sys.exit(0)
 
 def Update(Force: bool = False):
+    SetTitle(Subtitle="Updating...")
+
     DownloadCache = {}
     LatestVersion = None
 
@@ -221,7 +247,9 @@ def Update(Force: bool = False):
         return CancelInstall(f"This version, {ThisVersion}, is already the latest available installation for PIP Module Installer.")
     
     LatestVersion = Result.replace("\n", "")
-    
+
+    SetTitle(Subtitle="Downloading update...")
+
     ## Download files
     ClearWindow()
     print("\nDownloading files...")
@@ -238,6 +266,7 @@ def Update(Force: bool = False):
     print("Download successful.")
     
     ## Remove old files
+    SetTitle(Subtitle="Removing old installation...")
     print("\nRemoving old installation...")
     for File in FilesToInstall:
         print(f"\t| removing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
@@ -254,6 +283,7 @@ def Update(Force: bool = False):
     print("Old installation files were removed successfully.")
 
     ## Replace with new files
+    SetTitle(Subtitle="Patching update...")
     print("\nInstalling new files...")
     for Name, Content in DownloadCache.items():
         print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{Name}{Fore.RESET}\": ", end = "")
@@ -274,7 +304,7 @@ def Update(Force: bool = False):
         
 ## commands
 class Container_Debug:
-    def getdirs(*args):
+    def dir(*args):
         print(f"Current working directory: {__file__}")
         print(f"Name: {__name__}")
     
@@ -494,6 +524,7 @@ class Container_Commands:
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
 ## Main
+SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
 IsUpdateAvailable, NewVersion = CheckForUpdates()
 
@@ -504,10 +535,13 @@ if IsUpdateAvailable:
     Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
 print()
+
 while True:
+    SetTitle()
+
     ## Input
     try:
-        inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
+        inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
@@ -529,6 +563,7 @@ while True:
     ## Execute Command
     if callable(Method):
         #Method(args)
+        SetTitle(Subtitle=command)
         try:
             Method(args)
         except Exception as e:
