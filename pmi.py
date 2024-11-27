@@ -162,6 +162,19 @@ ClearWindow()
 print("starting...")
 #SetTitle(Subtitle="starting")
 
+## Command Configuration
+CommandAliases = {
+    "clear": ["cls"],
+    "exit": ["quit", "q"],
+    "get": ["info", "show"],
+    "install": ["i"],
+    "list": ["lst","l"],
+    "run": ["r"],
+    "runl": ["rl"],
+    "uninstall": ["u", "remove"],
+    "verify": ["v"]
+}
+
 ## variables
 import colorama
 from colorama import Fore, Back, Style
@@ -175,6 +188,13 @@ DefaultTitle = f"PIP Module Installer [Version {ThisVersion}]"
 colorama.init(autoreset = True)
 
 ## functions
+def GetCommandFromAlias(Alias: str):
+    for Command, ListOfAliases in CommandAliases.items():
+        if Alias in ListOfAliases:
+            return True, Command
+    
+    return False, None
+
 def Error(Message: str):
     print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
 
@@ -513,6 +533,18 @@ class Container_Commands:
         Notice(f"Redirecting to: \"{Fore.LIGHTBLUE_EX}https://github.com/Greenloop36/PIP-Module-Installer/releases{Fore.RESET}\"...")
         webbrowser.open("https://github.com/Greenloop36/PIP-Module-Installer/releases")
     
+    def aliases(*args):
+        SpecificCommand = args[1] or ""
+
+        if SpecificCommand != "":
+            if SpecificCommand in CommandAliases:
+                print(f"list of aliases for \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\"")
+                PrintList(CommandAliases[SpecificCommand])
+            else:
+                Error(f"The command \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
+        else:
+            Error("Missing required argument #1 (Command)!")
+    
     def debug(*args):
         Method = getattr(Debug, args[1], None)
 
@@ -557,6 +589,11 @@ while True:
     command = inp.split(" ")[0]
     args = inp[len(command) + 1:]
 
+    IsAlias, ActualCommand = GetCommandFromAlias(command)
+
+    if IsAlias:
+        command = ActualCommand
+
     ## Get Method
     Method = getattr(Commands, command, None)
     
@@ -572,6 +609,6 @@ while True:
                 e = "Unknown exception"
             CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
-        CustomException(f"\"{command}\" is not recognised as an internal command.\n Use the \"list commands\" command to view the available commands.")
+        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\n Use the \"list commands\" command to view the available commands.")
 
     print()
