@@ -1,11 +1,11 @@
 # module installer
 
 ## Configuration
-required_modules = ["colorama", "requests"]
+required_modules = ["pip", "colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt", "README.md"]
-ThisVersion = "2.1.1"
+ThisVersion = "2.2"
 
 ### init
 print("initialising...")
@@ -13,8 +13,23 @@ import sys
 import subprocess
 import os
 import webbrowser
+from time import sleep as wait
+
+DefaultTitle = "init"
 
 ## Core Methods
+def SetTitle(Title: str = None, Subtitle: str = None):
+    t = None
+    if Title:
+        t = Title
+    elif Subtitle:
+        t = f"{DefaultTitle}: {Subtitle}"
+    else:
+        t = DefaultTitle
+
+    sys.stdout.write(f"\x1b]2;{t}\x07")
+
+
 def YesNo(prompt: str = None) -> bool:
     print(prompt,"(Y/n)")
 
@@ -56,6 +71,7 @@ def Pause() -> None: # Wait for a key press
     os.system("pause")
 
 def Quit(Message: str | None = None):
+    SetTitle(Subtitle="Quit")
     if Message:
         print(f"\n{Message}")
     
@@ -104,6 +120,7 @@ def Settings_Set(Key: str, Value: any):
 
 
 init_modules_to_install = []
+#SetTitle(Subtitle="check dependencies")
 print("checking dependencies...")
 
 # Check required dependencies
@@ -118,6 +135,8 @@ for module in required_modules:
 ClearWindow()
 
 # Install required modules (if necessary)
+#SetTitle(Subtitle="install dependencies")
+wait(0.1)
 if len(init_modules_to_install) > 0:
     print(f"\nThe required modules will now be installed automatically.")
 
@@ -148,10 +167,111 @@ from colorama import Fore, Back, Style
 import json
 import requests
 
+#SetTitle(Subtitle="starting")
+
+## Command Configuration
+CommandAliases = {
+    "clear": ["cls", "c"],
+    "exit": ["quit", "q"],
+    "get": ["info", "show"],
+    "install": ["i"],
+    "list": ["lst","l"],
+    "run": ["r"],
+    "runl": ["rl"],
+    "uninstall": ["u", "remove"],
+    "verify": ["v"],
+    "aliases": ["a"],
+    "help": ["h", "?"]
+}
+
+CommandHelp = {
+    "clear": {
+        "Description": "Clears the current text window.",
+        "Example": ["clear"]
+    },
+    "echo": {
+        "Description": "Displays messages.",
+        "Example": ["echo Hello World!"]
+    },
+    "exit": {
+        "Description": "Exit PIP Module Installer.",
+        "Example": ["exit"]
+    },
+    "get": {
+        "Description": "Get information for an installed package.",
+        "Example": ["get requests", "get pip"]
+    },
+    "install": {
+        "Description": "Installs the specified package(s) and their dependencies. Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["install requests", "install requests, pandas"]
+    },
+    "list": {
+        "Description": "List the contents of the specified list.",
+        "Example": ["list commands"]
+    },
+    "releases": {
+        "Description": "Open the releases GitHub page for PIP Module Installer.",
+        "Example": ["releases"]
+    },
+    "run": {
+        "Description": "Run the specified powershell command.",
+        "Example": ["run help", "run pip list"]
+    },
+    "runl": {
+        "Description": "Allows for multiple commands to be ran in an indefinite loop.",
+        "Example": ["runl"]
+    },
+    "uninstall": {
+        "Description": "Removes the specified package(s). Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["uninstall requests", "uninstall requests, pandas"]
+    },
+    "update": {
+        "Description": "Update PIP Module Installer. Use -f or --force to force a reinstall.",
+        "Example": ["update", "update -f"]
+    },
+    "upgrade": {
+        "Description": "Upgrades the specified package(s) to their latest version. Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["upgrade requests", "upgrade requests, pandas"]
+    },
+    "verify": {
+        "Description": "Checks for broken requirements in all of the installed packages.",
+        "Example": ["verify"]
+    },
+    
+}
+
+ProgramHelp = f"""
+Welcome to {Fore.MAGENTA}PIP Module Installer{Fore.RESET}.
+
+{Style.DIM}>>> Introduction{Style.RESET_ALL}
+To use this program, you'll type in commands to install, uninstall or upgrade packages from PyPi in a simple interface.
+Most Commands have arguments, separated by a space or comma.
+
+{Style.DIM}>>> Viewing information on commands{Style.RESET_ALL}
+To view a full list of the program's commands, run {Fore.BLUE}list commands{Fore.RESET}.
+You can then view more information about a specific command by typing {Fore.BLUE}help{Fore.RESET} followed by the command.
+    - For example, "{Fore.BLUE}help install{Fore.RESET}", would show information about the {Fore.BLUE}install{Fore.RESET} command.
+
+{Style.DIM}>>> Command aliases{Style.RESET_ALL}
+Some commands have aliases, which allow you to run the command quicker.
+To see the available aliases, use the {Fore.BLUE}alias{Fore.RESET} command, followed by the command to view the aliases for,
+    - For example, "{Fore.BLUE}aliases install{Fore.RESET}", would show the aliases for the {Fore.BLUE}install{Fore.RESET} command.
+"""
+
+Login = os.getlogin()
+DefaultTitle = f"PIP Module Installer [Version {ThisVersion}]"
+
 ## init
 colorama.init(autoreset = True)
 
 ## functions
+def GetCommandFromAlias(Alias: str):
+    for Command, ListOfAliases in CommandAliases.items():
+        if Alias in ListOfAliases:
+            return True, Command
+    
+    return False, None
+
 def Error(Message: str):
     print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
 
@@ -190,10 +310,13 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
         return False, None
 
 def Terminate(): # User initiated exits
+    SetTitle(Subtitle="Quit")
     CustomException("Quitting...")
     sys.exit(0)
 
 def Update(Force: bool = False):
+    SetTitle(Subtitle="Updating...")
+
     DownloadCache = {}
     LatestVersion = None
 
@@ -221,7 +344,9 @@ def Update(Force: bool = False):
         return CancelInstall(f"This version, {ThisVersion}, is already the latest available installation for PIP Module Installer.")
     
     LatestVersion = Result.replace("\n", "")
-    
+
+    SetTitle(Subtitle="Downloading update...")
+
     ## Download files
     ClearWindow()
     print("\nDownloading files...")
@@ -238,6 +363,7 @@ def Update(Force: bool = False):
     print("Download successful.")
     
     ## Remove old files
+    SetTitle(Subtitle="Removing old installation...")
     print("\nRemoving old installation...")
     for File in FilesToInstall:
         print(f"\t| removing \"{Fore.LIGHTBLUE_EX}{File}{Fore.RESET}\": ", end = "")
@@ -254,6 +380,7 @@ def Update(Force: bool = False):
     print("Old installation files were removed successfully.")
 
     ## Replace with new files
+    SetTitle(Subtitle="Patching update...")
     print("\nInstalling new files...")
     for Name, Content in DownloadCache.items():
         print(f"\t| installing \"{Fore.LIGHTBLUE_EX}{Name}{Fore.RESET}\": ", end = "")
@@ -274,7 +401,7 @@ def Update(Force: bool = False):
         
 ## commands
 class Container_Debug:
-    def getdirs(*args):
+    def dir(*args):
         print(f"Current working directory: {__file__}")
         print(f"Name: {__name__}")
     
@@ -483,6 +610,18 @@ class Container_Commands:
         Notice(f"Redirecting to: \"{Fore.LIGHTBLUE_EX}https://github.com/Greenloop36/PIP-Module-Installer/releases{Fore.RESET}\"...")
         webbrowser.open("https://github.com/Greenloop36/PIP-Module-Installer/releases")
     
+    def aliases(*args):
+        SpecificCommand = args[1] or ""
+
+        if SpecificCommand != "":
+            if SpecificCommand in CommandAliases:
+                print(f"list of aliases for \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\"")
+                PrintList(CommandAliases[SpecificCommand])
+            else:
+                Error(f"The command \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
+        else:
+            Error("Missing required argument #1 (Command)!")
+    
     def debug(*args):
         Method = getattr(Debug, args[1], None)
 
@@ -493,21 +632,50 @@ class Container_Commands:
                 CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.BLUE}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
+
+    def help(*args):
+        Command = args[1]
+
+        if Command != "":
+            if Command in CommandHelp:
+                Help = CommandHelp[Command]
+
+                print(f"Showing help for {Fore.BLUE}{Command}\n")
+                print(f"Description: {Help["Description"]}")
+                print(f"Example usage:")
+                PrintList(Help["Example"])
+                
+                if Command in CommandAliases:
+                    print(f"\nAliases:")
+                    PrintList(CommandAliases[Command])
+                else:
+                    print(f"\nAliases: {Fore.LIGHTRED_EX}None{Fore.RESET}")
+            else:
+                Error("This command does not exist, or, does not have an associated description.")
+        else:
+            print(ProgramHelp)
+
 ## Main
+SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
 IsUpdateAvailable, NewVersion = CheckForUpdates()
 
 Commands = Container_Commands()
 ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
+print(f"Type \"help\" for guidance.")
 if IsUpdateAvailable:
+    print()
     Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
 print()
+
 while True:
+    SetTitle()
+
     ## Input
     try:
-        inp = input(f"{Fore.YELLOW}<{os.getlogin()}$pmi>{Fore.RESET} ")
+        inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
@@ -523,12 +691,18 @@ while True:
     command = inp.split(" ")[0]
     args = inp[len(command) + 1:]
 
+    IsAlias, ActualCommand = GetCommandFromAlias(command)
+
+    if IsAlias:
+        command = ActualCommand
+
     ## Get Method
     Method = getattr(Commands, command, None)
     
     ## Execute Command
     if callable(Method):
         #Method(args)
+        SetTitle(Subtitle=command)
         try:
             Method(args)
         except Exception as e:
@@ -537,6 +711,6 @@ while True:
                 e = "Unknown exception"
             CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
-        CustomException(f"\"{command}\" is not recognised as an internal command.\n Use the \"list commands\" command to view the available commands.")
+        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\n Use the \"list commands\" command to view the available commands.")
 
     print()
