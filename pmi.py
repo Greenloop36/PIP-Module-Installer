@@ -181,7 +181,8 @@ CommandAliases = {
     "uninstall": ["u", "remove"],
     "verify": ["v"],
     "aliases": ["a"],
-    "help": ["h", "?"]
+    "help": ["h", "?"],
+    "pip": ["p"]
 }
 
 CommandHelp = {
@@ -236,6 +237,10 @@ CommandHelp = {
     "verify": {
         "Description": "Checks for broken requirements in all of the installed packages.",
         "Example": ["verify"]
+    },
+    "pip": {
+        "Description": "Runs pip commands.",
+        "Example": ["pip list", "pip show pip"]
     },
     
 }
@@ -654,6 +659,29 @@ class Container_Commands:
                 Error("This command does not exist, or, does not have an associated description.")
         else:
             print(ProgramHelp)
+    
+    def pip(*args):
+        cmd: str = args[1]
+
+        if cmd == "":
+            return Error("Missing required argument #1 (Parameters/options)!")
+        
+        cmd = "pip " + cmd
+        
+        print(f"{Fore.MAGENTA}${Fore.RESET} {cmd}\n")
+        
+        try:
+            Result = subprocess.run(cmd)
+        except FileNotFoundError:
+            Error("Command execution failed (command not found).")
+        except Exception as e:
+            return Error(f"(internal error) Command execution failed.\n\t| {Style.DIM}{e}")
+        else:
+            ## result
+            if Result.returncode != 0:
+                Warning(f"Exit code {Result.returncode}")
+        
+        print()
 
 ## Main
 SetTitle(Subtitle="checking for updates")
