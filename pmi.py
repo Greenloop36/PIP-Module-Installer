@@ -160,11 +160,18 @@ ClearWindow()
 ## MAIN
 ##########################################
 print("starting...")
+
+## variables
+import colorama
+from colorama import Fore, Back, Style
+import json
+import requests
+
 #SetTitle(Subtitle="starting")
 
 ## Command Configuration
 CommandAliases = {
-    "clear": ["cls"],
+    "clear": ["cls", "c"],
     "exit": ["quit", "q"],
     "get": ["info", "show"],
     "install": ["i"],
@@ -172,14 +179,84 @@ CommandAliases = {
     "run": ["r"],
     "runl": ["rl"],
     "uninstall": ["u", "remove"],
-    "verify": ["v"]
+    "verify": ["v"],
+    "aliases": ["a"],
+    "help": ["h", "?"]
 }
 
-## variables
-import colorama
-from colorama import Fore, Back, Style
-import json
-import requests
+CommandHelp = {
+    "clear": {
+        "Description": "Clears the current text window.",
+        "Example": ["clear"]
+    },
+    "echo": {
+        "Description": "Displays messages.",
+        "Example": ["echo Hello World!"]
+    },
+    "exit": {
+        "Description": "Exit PIP Module Installer.",
+        "Example": ["exit"]
+    },
+    "get": {
+        "Description": "Get information for an installed package.",
+        "Example": ["get requests", "get pip"]
+    },
+    "install": {
+        "Description": "Installs the specified package(s) and their dependencies. Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["install requests", "install requests, pandas"]
+    },
+    "list": {
+        "Description": "List the contents of the specified list.",
+        "Example": ["list commands"]
+    },
+    "releases": {
+        "Description": "Open the releases GitHub page for PIP Module Installer.",
+        "Example": ["releases"]
+    },
+    "run": {
+        "Description": "Run the specified powershell command.",
+        "Example": ["run help", "run pip list"]
+    },
+    "runl": {
+        "Description": "Allows for multiple commands to be ran in an indefinite loop.",
+        "Example": ["runl"]
+    },
+    "uninstall": {
+        "Description": "Removes the specified package(s). Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["uninstall requests", "uninstall requests, pandas"]
+    },
+    "update": {
+        "Description": "Update PIP Module Installer. Use -f or --force to force a reinstall.",
+        "Example": ["update", "update -f"]
+    },
+    "upgrade": {
+        "Description": "Upgrades the specified package(s) to their latest version. Multiple packages can be specified by using a comma as a separator.",
+        "Example": ["upgrade requests", "upgrade requests, pandas"]
+    },
+    "verify": {
+        "Description": "Checks for broken requirements in all of the installed packages.",
+        "Example": ["verify"]
+    },
+    
+}
+
+ProgramHelp = f"""
+Welcome to {Fore.MAGENTA}PIP Module Installer{Fore.RESET}.
+
+{Style.DIM}>>> Introduction{Style.RESET_ALL}
+To use this program, you'll type in commands to install, uninstall or upgrade packages from PyPi in a simple interface.
+Most Commands have arguments, separated by a space or comma.
+
+{Style.DIM}>>> Viewing information on commands{Style.RESET_ALL}
+To view a full list of the program's commands, run {Fore.BLUE}list commands{Fore.RESET}.
+You can then view more information about a specific command by typing {Fore.BLUE}help{Fore.RESET} followed by the command.
+    - For example, "{Fore.BLUE}help install{Fore.RESET}", would show information about the {Fore.BLUE}install{Fore.RESET} command.
+
+{Style.DIM}>>> Command aliases{Style.RESET_ALL}
+Some commands have aliases, which allow you to run the command quicker.
+To see the available aliases, use the {Fore.BLUE}alias{Fore.RESET} command, followed by the command to view the aliases for,
+    - For example, "{Fore.BLUE}aliases install{Fore.RESET}", would show the aliases for the {Fore.BLUE}install{Fore.RESET} command.
+"""
 
 Login = os.getlogin()
 DefaultTitle = f"PIP Module Installer [Version {ThisVersion}]"
@@ -555,6 +632,29 @@ class Container_Commands:
                 CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.BLUE}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
+
+    def help(*args):
+        Command = args[1]
+
+        if Command != "":
+            if Command in CommandHelp:
+                Help = CommandHelp[Command]
+
+                print(f"Showing help for {Fore.BLUE}{Command}\n")
+                print(f"Description: {Help["Description"]}")
+                print(f"Example usage:")
+                PrintList(Help["Example"])
+                
+                if Command in CommandAliases:
+                    print(f"\nAliases:")
+                    PrintList(CommandAliases[Command])
+                else:
+                    print(f"\nAliases: {Fore.LIGHTRED_EX}None{Fore.RESET}")
+            else:
+                Error("This command does not exist, or, does not have an associated description.")
+        else:
+            print(ProgramHelp)
+
 ## Main
 SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
@@ -563,6 +663,7 @@ IsUpdateAvailable, NewVersion = CheckForUpdates()
 Commands = Container_Commands()
 ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
+print(f"Type \"help\" for guidance.")
 if IsUpdateAvailable:
     Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
