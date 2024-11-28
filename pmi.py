@@ -5,7 +5,7 @@ required_modules = ["pip", "colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt", "README.md"]
-ThisVersion = "2.1.1"
+ThisVersion = "2.2"
 
 ### init
 print("initialising...")
@@ -665,6 +665,7 @@ ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
 print(f"Type \"help\" for guidance.")
 if IsUpdateAvailable:
+    print()
     Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
 
 print()
