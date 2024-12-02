@@ -708,7 +708,8 @@ while True:
 
     ## Input
     try:
-        inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
+        #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
+        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi {Fore.MAGENTA}${Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
