@@ -253,14 +253,14 @@ To use this program, you'll type in commands to install, uninstall or upgrade pa
 Most Commands have arguments, separated by a space or comma.
 
 {Style.DIM}>>> Viewing information on commands{Style.RESET_ALL}
-To view a full list of the program's commands, run {Fore.BLUE}list commands{Fore.RESET}.
-You can then view more information about a specific command by typing {Fore.BLUE}help{Fore.RESET} followed by the command.
-    - For example, "{Fore.BLUE}help install{Fore.RESET}", would show information about the {Fore.BLUE}install{Fore.RESET} command.
+To view a full list of the program's commands, run {Fore.LIGHTBLUE_EX}list commands{Fore.RESET}.
+You can then view more information about a specific command by typing {Fore.LIGHTBLUE_EX}help{Fore.RESET} followed by the command.
+    - For example, "{Fore.LIGHTBLUE_EX}help install{Fore.RESET}", would show information about the {Fore.LIGHTBLUE_EX}install{Fore.RESET} command.
 
 {Style.DIM}>>> Command aliases{Style.RESET_ALL}
 Some commands have aliases, which allow you to run the command quicker.
-To see the available aliases, use the {Fore.BLUE}aliases{Fore.RESET} command, followed by the command to view the aliases for,
-    - For example, "{Fore.BLUE}aliases install{Fore.RESET}", would show the aliases for the {Fore.BLUE}install{Fore.RESET} command.
+To see the available aliases, use the {Fore.LIGHTBLUE_EX}aliases{Fore.RESET} command, followed by the command to view the aliases for,
+    - For example, "{Fore.LIGHTBLUE_EX}aliases install{Fore.RESET}", would show the aliases for the {Fore.LIGHTBLUE_EX}install{Fore.RESET} command.
 """
 
 Login = os.getlogin()
@@ -437,7 +437,7 @@ class Container_Commands:
 
         for Module in ModulesToInstall:
             Module = Module.replace(" ", "")
-            print(f"\tInstalling {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            print(f"\tInstalling {Fore.LIGHTBLUE_EX}{str(Module)}{Fore.RESET}:", end = "")
             Success, Result, ExitCode = InstallModule(Module)
 
             ## result
@@ -445,7 +445,7 @@ class Container_Commands:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to install {Fore.LIGHTBLUE_EX}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
                 print("\n")
     
     def uninstall(*args):
@@ -466,13 +466,13 @@ class Container_Commands:
         ## uninstall
         for Module in ModulesToRemove:
             Module = Module.replace(" ", "")
-            print(f"\tRemoving {Fore.BLUE}{Module}{Fore.RESET}:", end = "")
+            print(f"\tRemoving {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}:", end = "")
             Result = subprocess.run(['cmd', '/c', f'pip uninstall {Module} --yes'], shell=True, capture_output=True, text=True)
 
             ## result
             if Result.returncode != 0:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to remove {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
+                Error(f"Failed to remove {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
                 print()
             else:
                 if Result.stderr.find("WARNING") != -1:
@@ -500,10 +500,10 @@ class Container_Commands:
 
         ## out
         if ToPrint:
-            print(f"list \"{Fore.BLUE}{ListName}{Fore.RESET}\":")
+            print(f"list \"{Fore.LIGHTBLUE_EX}{ListName}{Fore.RESET}\":")
             PrintList(ToPrint)
         else:
-            Error(f"The list \"{Fore.BLUE}{ListName}{Fore.RESET}\" does not exist.")
+            Error(f"The list \"{Fore.LIGHTBLUE_EX}{ListName}{Fore.RESET}\" does not exist.")
     
     def upgrade(*args):
         ## variables
@@ -525,7 +525,7 @@ class Container_Commands:
         for Module in ModulesToUpgrade:
             Module = Module.replace(" ", "")
 
-            print(f"\tUpgrading {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            print(f"\tUpgrading {Fore.LIGHTBLUE_EX}{str(Module)}{Fore.RESET}:", end = "")
             Success, Result, ExitCode = InstallModule(f"-U {Module}")
 
             ## result
@@ -533,7 +533,7 @@ class Container_Commands:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to upgrade {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to upgrade {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
 
     def get(*args):
         ## variables
@@ -548,7 +548,7 @@ class Container_Commands:
 
         ## result
         if Result.returncode != 0:
-            Error(f"Could not get information for \"{Fore.BLUE}{ModuleName}{Fore.RESET}\"! The module might not be installed.")
+            Error(f"Could not get information for \"{Fore.LIGHTBLUE_EX}{ModuleName}{Fore.RESET}\"! The module might not be installed.")
     
     def run(*args):
         cmd = args[1]
@@ -625,10 +625,10 @@ class Container_Commands:
                 SpecificCommand = Alias
 
             if SpecificCommand in CommandAliases:
-                print(f"list of aliases for \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\"")
+                print(f"list of aliases for \"{Fore.LIGHTBLUE_EX}{SpecificCommand}{Fore.RESET}\"")
                 PrintList(CommandAliases[SpecificCommand])
             else:
-                Error(f"The command \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
+                Error(f"The command \"{Fore.LIGHTBLUE_EX}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
         else:
             Error("Missing required argument #1 (Command)!")
     
@@ -639,7 +639,7 @@ class Container_Commands:
             try:
                 Method(args[1:])
             except:
-                CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.BLUE}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+                CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.LIGHTBLUE_EX}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
 
@@ -650,7 +650,7 @@ class Container_Commands:
             if Command in CommandHelp:
                 Help = CommandHelp[Command]
 
-                print(f"Showing help for {Fore.BLUE}{Command}\n")
+                print(f"Showing help for {Fore.LIGHTBLUE_EX}{Command}\n")
                 print(f"Description: {Help["Description"]}")
                 print(f"Example usage:")
                 PrintList(Help["Example"])
@@ -709,7 +709,7 @@ while True:
     ## Input
     try:
         #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
-        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi {Fore.MAGENTA}${Fore.RESET} ")
+        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA}${Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
@@ -743,7 +743,7 @@ while True:
             print()
             if e == None or e == "":
                 e = "Unknown exception"
-            CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+            CustomException(f"An exception occurred whilst running the command {Fore.LIGHTBLUE_EX}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
         CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
 
