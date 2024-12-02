@@ -259,7 +259,7 @@ You can then view more information about a specific command by typing {Fore.BLUE
 
 {Style.DIM}>>> Command aliases{Style.RESET_ALL}
 Some commands have aliases, which allow you to run the command quicker.
-To see the available aliases, use the {Fore.BLUE}alias{Fore.RESET} command, followed by the command to view the aliases for,
+To see the available aliases, use the {Fore.BLUE}aliases{Fore.RESET} command, followed by the command to view the aliases for,
     - For example, "{Fore.BLUE}aliases install{Fore.RESET}", would show the aliases for the {Fore.BLUE}install{Fore.RESET} command.
 """
 
@@ -525,15 +525,15 @@ class Container_Commands:
         for Module in ModulesToUpgrade:
             Module = Module.replace(" ", "")
 
-            print(f"\tUpgrading {Fore.BLUE}{str(ModuleName)}{Fore.RESET}:", end = "")
-            Success, Result, ExitCode = InstallModule(f"-U {ModuleName}")
+            print(f"\tUpgrading {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            Success, Result, ExitCode = InstallModule(f"-U {Module}")
 
             ## result
             if Success:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to upgrade {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to upgrade {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
 
     def get(*args):
         ## variables
@@ -619,6 +619,11 @@ class Container_Commands:
         SpecificCommand = args[1] or ""
 
         if SpecificCommand != "":
+            IsAlias, Alias = GetCommandFromAlias(SpecificCommand)
+
+            if IsAlias:
+                SpecificCommand = Alias
+
             if SpecificCommand in CommandAliases:
                 print(f"list of aliases for \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\"")
                 PrintList(CommandAliases[SpecificCommand])
@@ -739,6 +744,6 @@ while True:
                 e = "Unknown exception"
             CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
     else:
-        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\n Use the \"list commands\" command to view the available commands.")
+        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
 
     print()
