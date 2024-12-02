@@ -525,15 +525,15 @@ class Container_Commands:
         for Module in ModulesToUpgrade:
             Module = Module.replace(" ", "")
 
-            print(f"\tUpgrading {Fore.BLUE}{str(ModuleName)}{Fore.RESET}:", end = "")
-            Success, Result, ExitCode = InstallModule(f"-U {ModuleName}")
+            print(f"\tUpgrading {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            Success, Result, ExitCode = InstallModule(f"-U {Module}")
 
             ## result
             if Success:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to upgrade {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to upgrade {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
 
     def get(*args):
         ## variables
