@@ -430,6 +430,37 @@ def VerifyInstallation(ForceIfBroken: bool = False):
         else:
             if YesNo("Would you like to repair your installation by updating to the latest version?") == True:
                 Update(True)
+
+def ParseCommand(inp: str):
+    ## Ignore Blank
+    if inp == "" or inp.startswith(" "):
+        return
+
+    ## Parse
+    command = inp.split(" ")[0]
+    args = inp[len(command) + 1:]
+
+    IsAlias, ActualCommand = GetCommandFromAlias(command)
+
+    if IsAlias:
+        command = ActualCommand
+
+    ## Get Method
+    Method = getattr(Commands, command, None)
+    
+    ## Execute Command
+    if callable(Method):
+        #Method(args)
+        SetTitle(Subtitle=command)
+        try:
+            Method(args)
+        except Exception as e:
+            print()
+            if e == None or e == "":
+                e = "Unknown exception"
+            CustomException(f"An exception occurred whilst running the command {Fore.LIGHTBLUE_EX}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+    else:
+        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
         
 ## commands
 class Container_Debug:
@@ -732,48 +763,25 @@ if IsUpdateAvailable:
 
 print()
 
+if len(sys.argv) >= 1:
+    for command in sys.argv[1:]:
+        print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
+        ParseCommand(command)
+        print()
+
 while True:
     SetTitle()
 
     ## Input
     try:
         #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
-        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA}${Fore.RESET} ")
+        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
     except EOFError:
-        CustomException("\nEnd of File")
-        Terminate()
+        pass
 
-    ## Ignore Blank
-    if inp == "" or inp.startswith(" "):
-        continue
-
-    ## Parse
-    command = inp.split(" ")[0]
-    args = inp[len(command) + 1:]
-
-    IsAlias, ActualCommand = GetCommandFromAlias(command)
-
-    if IsAlias:
-        command = ActualCommand
-
-    ## Get Method
-    Method = getattr(Commands, command, None)
-    
-    ## Execute Command
-    if callable(Method):
-        #Method(args)
-        SetTitle(Subtitle=command)
-        try:
-            Method(args)
-        except Exception as e:
-            print()
-            if e == None or e == "":
-                e = "Unknown exception"
-            CustomException(f"An exception occurred whilst running the command {Fore.LIGHTBLUE_EX}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
-    else:
-        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
+    ParseCommand(inp)
 
     print()
