@@ -235,8 +235,8 @@ CommandHelp = {
         "Example": ["upgrade requests", "upgrade requests, pandas"]
     },
     "verify": {
-        "Description": "Checks for broken requirements in all of the installed packages.",
-        "Example": ["verify"]
+        "Description": "Checks for broken requirements in all of the installed packages, or PIP Module Installer itself.",
+        "Example": ["verify pip", "verify pmi"]
     },
     "pip": {
         "Description": "Runs pip commands.",
