@@ -403,6 +403,33 @@ def Update(Force: bool = False):
     ## Finish
     print("Installation successful.\n")
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
+
+def VerifyInstallation(ForceIfBroken: bool = False):
+    print("Verifying installation...")
+    ShouldUpdate = False
+
+    for name in FilesToInstall:
+        print(f"\t| {name}: ", end = "")
+        try:
+            file = open(name, "r")
+        except FileNotFoundError:
+            print("Missing!")
+            UpdateRequired = True
+        else:
+            print("OK")
+
+    print("\n")
+
+    if ShouldUpdate == True:
+        Warning("Missing or corrupt files present in this installation!")
+
+        if ForceIfBroken:
+            print("You are required to update to the latest installation.")
+            Pause()
+            Update(True)
+        else:
+            if YesNo("Would you like to repair your installation by updating to the latest version?") == True:
+                Update(True)
         
 ## commands
 class Container_Debug:
@@ -689,6 +716,8 @@ class Container_Commands:
         print()
 
 ## Main
+VerifyInstallation(False)
+
 SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
 IsUpdateAvailable, NewVersion = CheckForUpdates()
