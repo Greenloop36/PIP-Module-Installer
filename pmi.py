@@ -414,7 +414,7 @@ def VerifyInstallation(ForceIfBroken: bool = False):
             file = open(name, "r")
         except FileNotFoundError:
             print("Missing!")
-            UpdateRequired = True
+            ShouldUpdate = True
         else:
             print("OK")
 
