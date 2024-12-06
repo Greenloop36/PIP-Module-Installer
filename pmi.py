@@ -411,21 +411,31 @@ def Update(Force: bool = False):
     PrintSuccess("Installation successful.\n")
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
 
-def VerifyInstallation(ForceIfBroken: bool = False):
-    print("Verifying installation...")
+def VerifyInstallation(ForceIfBroken: bool = False, Silent: bool = False):
+    if not Silent:
+        print("Verifying installation...")
+
     ShouldUpdate = False
 
     for name in FilesToInstall:
-        print(f"\t| checking \"{Fore.LIGHTBLUE_EX}{name}{Fore.RESET}\": ", end = "")
+        if not Silent:
+            print(f"\t| checking \"{Fore.LIGHTBLUE_EX}{name}{Fore.RESET}\": ", end = "")
         try:
             file = open(name, "r")
         except FileNotFoundError:
-            print(f"{Fore.LIGHTRED_EX}Missing!{Fore.RESET}")
+            if not Silent:
+                print(f"{Fore.LIGHTRED_EX}Missing!{Fore.RESET}")
             ShouldUpdate = True
         else:
-            print(f"{Fore.GREEN}OK{Fore.RESET}")
-
-    print("")
+            if not Silent:
+                print(f"{Fore.GREEN}OK{Fore.RESET}")
+            else:
+                pass
+    if not Silent:
+        print("")
+    
+    if Silent:
+        return ShouldUpdate
 
     if ShouldUpdate == True:
         Warning("Missing or corrupt files present in this installation!")
@@ -768,7 +778,8 @@ class Container_Commands:
         print()
 
 ## Main
-VerifyInstallation(False)
+print("Verifying installation...")
+IsInstallationCorrupt = VerifyInstallation(False, True)
 
 SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
@@ -777,16 +788,19 @@ IsUpdateAvailable, NewVersion = CheckForUpdates()
 Commands = Container_Commands()
 ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
-print(f"Type \"help\" for guidance.")
-if IsUpdateAvailable:
-    print()
-    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
+print(f"Type \"help\" for guidance.\n")
 
-print()
+if IsUpdateAvailable:
+    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
+
+if IsInstallationCorrupt:
+    Warning(f"Your installation has missing or broken files! Please run \"{Fore.BLUE}verify pmi{Fore.RESET}\" to repair it!\n")
+
 
 # If commands are specified to PMI, run them all
-if len(sys.argv) >= 1:
-    for command in sys.argv[1:]:
+_CustomArguments = sys.argv[1:]
+if len(_CustomArguments) > 0:
+    for command in sys.argv:
         print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
         ParseCommand(command)
         print()
