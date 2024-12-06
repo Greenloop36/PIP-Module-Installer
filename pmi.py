@@ -138,6 +138,10 @@ ClearWindow()
 #SetTitle(Subtitle="install dependencies")
 wait(0.1)
 if len(init_modules_to_install) > 0:
+
+    if len(sys.argv) >= 1:
+        Quit(f"PIP Module Installer is not configured correctly. Please run it manually before running commands via arguments.\n\n({len(sys.argv)} command(s) were voided)")
+
     print(f"\nThe required modules will now be installed automatically.")
 
     for module in init_modules_to_install:
@@ -235,8 +239,8 @@ CommandHelp = {
         "Example": ["upgrade requests", "upgrade requests, pandas"]
     },
     "verify": {
-        "Description": "Checks for broken requirements in all of the installed packages.",
-        "Example": ["verify"]
+        "Description": "Checks for broken requirements in all of the installed packages, or PIP Module Installer itself.",
+        "Example": ["verify pip", "verify pmi"]
     },
     "pip": {
         "Description": "Runs pip commands.",
@@ -253,14 +257,14 @@ To use this program, you'll type in commands to install, uninstall or upgrade pa
 Most Commands have arguments, separated by a space or comma.
 
 {Style.DIM}>>> Viewing information on commands{Style.RESET_ALL}
-To view a full list of the program's commands, run {Fore.BLUE}list commands{Fore.RESET}.
-You can then view more information about a specific command by typing {Fore.BLUE}help{Fore.RESET} followed by the command.
-    - For example, "{Fore.BLUE}help install{Fore.RESET}", would show information about the {Fore.BLUE}install{Fore.RESET} command.
+To view a full list of the program's commands, run {Fore.LIGHTBLUE_EX}list commands{Fore.RESET}.
+You can then view more information about a specific command by typing {Fore.LIGHTBLUE_EX}help{Fore.RESET} followed by the command.
+    - For example, "{Fore.LIGHTBLUE_EX}help install{Fore.RESET}", would show information about the {Fore.LIGHTBLUE_EX}install{Fore.RESET} command.
 
 {Style.DIM}>>> Command aliases{Style.RESET_ALL}
 Some commands have aliases, which allow you to run the command quicker.
-To see the available aliases, use the {Fore.BLUE}aliases{Fore.RESET} command, followed by the command to view the aliases for,
-    - For example, "{Fore.BLUE}aliases install{Fore.RESET}", would show the aliases for the {Fore.BLUE}install{Fore.RESET} command.
+To see the available aliases, use the {Fore.LIGHTBLUE_EX}aliases{Fore.RESET} command, followed by the command to view the aliases for,
+    - For example, "{Fore.LIGHTBLUE_EX}aliases install{Fore.RESET}", would show the aliases for the {Fore.LIGHTBLUE_EX}install{Fore.RESET} command.
 """
 
 Login = os.getlogin()
@@ -279,6 +283,9 @@ def GetCommandFromAlias(Alias: str):
 
 def Error(Message: str):
     print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
+
+def PrintSuccess(Message: str):
+    print(Fore.LIGHTGREEN_EX + "success" + Fore.RESET + ": " + str(Message))
 
 def Notice(Message: str):
     print(Fore.MAGENTA + "notice" + Fore.RESET + ": " + str(Message))
@@ -401,8 +408,78 @@ def Update(Force: bool = False):
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
     ## Finish
-    print("Installation successful.\n")
+    PrintSuccess("Installation successful.\n")
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
+
+def VerifyInstallation(ForceIfBroken: bool = False, Silent: bool = False):
+    if not Silent:
+        print("Verifying installation...")
+
+    ShouldUpdate = False
+
+    for name in FilesToInstall:
+        if not Silent:
+            print(f"\t| checking \"{Fore.LIGHTBLUE_EX}{name}{Fore.RESET}\": ", end = "")
+        try:
+            file = open(name, "r")
+        except FileNotFoundError:
+            if not Silent:
+                print(f"{Fore.LIGHTRED_EX}Missing!{Fore.RESET}")
+            ShouldUpdate = True
+        else:
+            if not Silent:
+                print(f"{Fore.GREEN}OK{Fore.RESET}")
+            else:
+                pass
+    if not Silent:
+        print("")
+    
+    if Silent:
+        return ShouldUpdate
+
+    if ShouldUpdate == True:
+        Warning("Missing or corrupt files present in this installation!")
+
+        if ForceIfBroken:
+            print("You are required to update to the latest installation.")
+            Pause()
+            Update(True)
+        else:
+            if YesNo("Would you like to repair your installation by updating to the latest version?") == True:
+                Update(True)
+    else:
+        PrintSuccess("No errors were found within the installation.")
+
+def ParseCommand(inp: str):
+    ## Ignore Blank
+    if inp == "" or inp.startswith(" "):
+        return
+
+    ## Parse
+    command = inp.split(" ")[0]
+    args = inp[len(command) + 1:]
+
+    IsAlias, ActualCommand = GetCommandFromAlias(command)
+
+    if IsAlias:
+        command = ActualCommand
+
+    ## Get Method
+    Method = getattr(Commands, command, None)
+    
+    ## Execute Command
+    if callable(Method):
+        #Method(args)
+        SetTitle(Subtitle=command)
+        try:
+            Method(args)
+        except Exception as e:
+            print()
+            if e == None or e == "":
+                e = "Unknown exception"
+            CustomException(f"An exception occurred whilst running the command {Fore.LIGHTBLUE_EX}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+    else:
+        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
         
 ## commands
 class Container_Debug:
@@ -437,7 +514,7 @@ class Container_Commands:
 
         for Module in ModulesToInstall:
             Module = Module.replace(" ", "")
-            print(f"\tInstalling {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            print(f"\tInstalling {Fore.LIGHTBLUE_EX}{str(Module)}{Fore.RESET}:", end = "")
             Success, Result, ExitCode = InstallModule(Module)
 
             ## result
@@ -445,7 +522,7 @@ class Container_Commands:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to install {Fore.BLUE}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to install {Fore.LIGHTBLUE_EX}{ModuleName}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
                 print("\n")
     
     def uninstall(*args):
@@ -466,13 +543,13 @@ class Container_Commands:
         ## uninstall
         for Module in ModulesToRemove:
             Module = Module.replace(" ", "")
-            print(f"\tRemoving {Fore.BLUE}{Module}{Fore.RESET}:", end = "")
+            print(f"\tRemoving {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}:", end = "")
             Result = subprocess.run(['cmd', '/c', f'pip uninstall {Module} --yes'], shell=True, capture_output=True, text=True)
 
             ## result
             if Result.returncode != 0:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to remove {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
+                Error(f"Failed to remove {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.stderr.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {Result.returncode})")
                 print()
             else:
                 if Result.stderr.find("WARNING") != -1:
@@ -500,10 +577,10 @@ class Container_Commands:
 
         ## out
         if ToPrint:
-            print(f"list \"{Fore.BLUE}{ListName}{Fore.RESET}\":")
+            print(f"list \"{Fore.LIGHTBLUE_EX}{ListName}{Fore.RESET}\":")
             PrintList(ToPrint)
         else:
-            Error(f"The list \"{Fore.BLUE}{ListName}{Fore.RESET}\" does not exist.")
+            Error(f"The list \"{Fore.LIGHTBLUE_EX}{ListName}{Fore.RESET}\" does not exist.")
     
     def upgrade(*args):
         ## variables
@@ -525,7 +602,7 @@ class Container_Commands:
         for Module in ModulesToUpgrade:
             Module = Module.replace(" ", "")
 
-            print(f"\tUpgrading {Fore.BLUE}{str(Module)}{Fore.RESET}:", end = "")
+            print(f"\tUpgrading {Fore.LIGHTBLUE_EX}{str(Module)}{Fore.RESET}:", end = "")
             Success, Result, ExitCode = InstallModule(f"-U {Module}")
 
             ## result
@@ -533,7 +610,7 @@ class Container_Commands:
                 print(f"{Fore.GREEN} OK")
             else:
                 print(f"{Fore.RED} FAILED\n")
-                Error(f"Failed to upgrade {Fore.BLUE}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
+                Error(f"Failed to upgrade {Fore.LIGHTBLUE_EX}{Module}{Fore.RESET}!\n\t| {Style.DIM}{Result.replace("\n", f"\n\t{Style.RESET_ALL}|{Style.DIM} ")}{Style.RESET_ALL}(Exit code {ExitCode})")
 
     def get(*args):
         ## variables
@@ -548,7 +625,7 @@ class Container_Commands:
 
         ## result
         if Result.returncode != 0:
-            Error(f"Could not get information for \"{Fore.BLUE}{ModuleName}{Fore.RESET}\"! The module might not be installed.")
+            Error(f"Could not get information for \"{Fore.LIGHTBLUE_EX}{ModuleName}{Fore.RESET}\"! The module might not be installed.")
     
     def run(*args):
         cmd = args[1]
@@ -600,8 +677,15 @@ class Container_Commands:
         print(args[1])
     
     def verify(*args):
-        print("Verifying the integrity of installed modules...\n")
-        subprocess.run(f"pip check")
+        Check: str = args[1]
+        
+        if Check == "pip":
+            print("Verifying the integrity of installed modules...\n")
+            subprocess.run(f"pip check")
+        elif Check == "pmi":
+            VerifyInstallation()
+        else:
+            Error("Erroneous argument #1 \"check\"! (Must be either \"pip\" or \"pmi\")")
     
     def update(*args):
         if args[1] == "--force" or args[1] == "-f":
@@ -625,10 +709,10 @@ class Container_Commands:
                 SpecificCommand = Alias
 
             if SpecificCommand in CommandAliases:
-                print(f"list of aliases for \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\"")
+                print(f"list of aliases for \"{Fore.LIGHTBLUE_EX}{SpecificCommand}{Fore.RESET}\"")
                 PrintList(CommandAliases[SpecificCommand])
             else:
-                Error(f"The command \"{Fore.BLUE}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
+                Error(f"The command \"{Fore.LIGHTBLUE_EX}{SpecificCommand}{Fore.RESET}\" does not exit or does not have any aliases.")
         else:
             Error("Missing required argument #1 (Command)!")
     
@@ -639,7 +723,7 @@ class Container_Commands:
             try:
                 Method(args[1:])
             except:
-                CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.BLUE}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
+                CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.LIGHTBLUE_EX}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
 
@@ -647,10 +731,15 @@ class Container_Commands:
         Command = args[1]
 
         if Command != "":
+            IsAlias, Alias = GetCommandFromAlias(Command)
+
+            if IsAlias:
+                Command = Alias
+
             if Command in CommandHelp:
                 Help = CommandHelp[Command]
 
-                print(f"Showing help for {Fore.BLUE}{Command}\n")
+                print(f"Showing help for {Fore.LIGHTBLUE_EX}{Command}\n")
                 print(f"Description: {Help["Description"]}")
                 print(f"Example usage:")
                 PrintList(Help["Example"])
@@ -689,6 +778,9 @@ class Container_Commands:
         print()
 
 ## Main
+print("Verifying installation...")
+IsInstallationCorrupt = VerifyInstallation(False, True)
+
 SetTitle(Subtitle="checking for updates")
 print("Checking for updates...")
 IsUpdateAvailable, NewVersion = CheckForUpdates()
@@ -696,12 +788,29 @@ IsUpdateAvailable, NewVersion = CheckForUpdates()
 Commands = Container_Commands()
 ClearWindow()
 print(f"PIP Module Installer [Version {ThisVersion}]")
-print(f"Type \"help\" for guidance.")
-if IsUpdateAvailable:
-    print()
-    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.")
+print(f"Type \"help\" for guidance.\n")
 
-print()
+if IsUpdateAvailable:
+    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
+
+if IsInstallationCorrupt:
+    Warning(f"Your installation has missing or broken files! Please run \"{Fore.BLUE}verify pmi{Fore.RESET}\" to repair it!\n")
+
+
+# If commands are specified to PMI, run them all
+_CustomArguments = sys.argv[1:]
+if len(_CustomArguments) > 0:
+    for command in sys.argv:
+        print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
+        ParseCommand(command)
+        print()
+    
+    if len(sys.argv) == 1:
+        Notice("Completed 1 action.")
+    else:
+        Notice(f"Completed {len(sys.argv)} actions.")
+    
+    print()
 
 while True:
     SetTitle()
@@ -709,42 +818,13 @@ while True:
     ## Input
     try:
         #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
-        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi {Fore.MAGENTA}${Fore.RESET} ")
+        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} ")
     except KeyboardInterrupt:
         CustomException("\nKeyboard Interruption")
         Terminate()
     except EOFError:
-        CustomException("\nEnd of File")
-        Terminate()
+        pass
 
-    ## Ignore Blank
-    if inp == "" or inp.startswith(" "):
-        continue
-
-    ## Parse
-    command = inp.split(" ")[0]
-    args = inp[len(command) + 1:]
-
-    IsAlias, ActualCommand = GetCommandFromAlias(command)
-
-    if IsAlias:
-        command = ActualCommand
-
-    ## Get Method
-    Method = getattr(Commands, command, None)
-    
-    ## Execute Command
-    if callable(Method):
-        #Method(args)
-        SetTitle(Subtitle=command)
-        try:
-            Method(args)
-        except Exception as e:
-            print()
-            if e == None or e == "":
-                e = "Unknown exception"
-            CustomException(f"An exception occurred whilst running the command {Fore.BLUE}{command}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
-    else:
-        CustomException(f"\"{command}\" is not recognised as an internal command or alias.\nUse the \"list commands\" command to view the available commands.")
+    ParseCommand(inp)
 
     print()
