@@ -714,7 +714,7 @@ class Container_Commands:
         Command = args[1]
 
         if Command != "":
-            IsAlias, Alias = GetCommandFromAlias(CommandAliases)
+            IsAlias, Alias = GetCommandFromAlias(Command)
 
             if IsAlias:
                 Command = Alias
