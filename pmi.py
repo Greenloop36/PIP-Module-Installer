@@ -138,6 +138,10 @@ ClearWindow()
 #SetTitle(Subtitle="install dependencies")
 wait(0.1)
 if len(init_modules_to_install) > 0:
+
+    if len(sys.argv) >= 1:
+        Quit(f"PIP Module Installer is not configured correctly. Please run it manually before running commands via arguments.\n\n({len(sys.argv)} command(s) were voided)")
+
     print(f"\nThe required modules will now be installed automatically.")
 
     for module in init_modules_to_install:
@@ -280,6 +284,9 @@ def GetCommandFromAlias(Alias: str):
 def Error(Message: str):
     print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
 
+def PrintSuccess(Message: str):
+    print(Fore.LIGHTGREEN_EX + "success" + Fore.RESET + ": " + str(Message))
+
 def Notice(Message: str):
     print(Fore.MAGENTA + "notice" + Fore.RESET + ": " + str(Message))
 
@@ -401,7 +408,7 @@ def Update(Force: bool = False):
             print(f"{Fore.GREEN}OK{Fore.RESET}")
     
     ## Finish
-    print("Installation successful.\n")
+    PrintSuccess("Installation successful.\n")
     Quit(f"PIP Module Installer has been updated to Release {LatestVersion.replace("\n", "")}. Please restart the application.")
 
 def VerifyInstallation(ForceIfBroken: bool = False):
@@ -409,16 +416,16 @@ def VerifyInstallation(ForceIfBroken: bool = False):
     ShouldUpdate = False
 
     for name in FilesToInstall:
-        print(f"\t| {name}: ", end = "")
+        print(f"\t| checking \"{Fore.LIGHTBLUE_EX}{name}{Fore.RESET}\": ", end = "")
         try:
             file = open(name, "r")
         except FileNotFoundError:
-            print("Missing!")
+            print(f"{Fore.LIGHTRED_EX}Missing!{Fore.RESET}")
             ShouldUpdate = True
         else:
-            print("OK")
+            print(f"{Fore.GREEN}OK{Fore.RESET}")
 
-    print("\n")
+    print("")
 
     if ShouldUpdate == True:
         Warning("Missing or corrupt files present in this installation!")
@@ -431,7 +438,7 @@ def VerifyInstallation(ForceIfBroken: bool = False):
             if YesNo("Would you like to repair your installation by updating to the latest version?") == True:
                 Update(True)
     else:
-        print("No errors were found within the installation.")
+        PrintSuccess("No errors were found within the installation.")
 
 def ParseCommand(inp: str):
     ## Ignore Blank
@@ -777,11 +784,19 @@ if IsUpdateAvailable:
 
 print()
 
+# If commands are specified to PMI, run them all
 if len(sys.argv) >= 1:
     for command in sys.argv[1:]:
         print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
         ParseCommand(command)
         print()
+    
+    if len(sys.argv) == 1:
+        Notice("Completed 1 action.")
+    else:
+        Notice(f"Completed {len(sys.argv)} actions.")
+    
+    print()
 
 while True:
     SetTitle()
