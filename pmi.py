@@ -5,7 +5,7 @@ required_modules = ["pip", "colorama", "requests"]
 
 BaseURL = "https://raw.githubusercontent.com/Greenloop36/PIP-Module-Installer/master/"
 FilesToInstall = ["pmi.py", "Version.txt", "README.md"]
-ThisVersion = "2.2"
+ThisVersion = "2.3"
 
 ### init
 print("initialising...")
