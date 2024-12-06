@@ -714,6 +714,11 @@ class Container_Commands:
         Command = args[1]
 
         if Command != "":
+            IsAlias, Alias = GetCommandFromAlias(CommandAliases)
+
+            if IsAlias:
+                Command = Alias
+
             if Command in CommandHelp:
                 Help = CommandHelp[Command]
 
