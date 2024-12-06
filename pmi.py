@@ -430,6 +430,8 @@ def VerifyInstallation(ForceIfBroken: bool = False):
         else:
             if YesNo("Would you like to repair your installation by updating to the latest version?") == True:
                 Update(True)
+    else:
+        print("No errors were found within the installation.")
 
 def ParseCommand(inp: str):
     ## Ignore Blank
@@ -658,8 +660,15 @@ class Container_Commands:
         print(args[1])
     
     def verify(*args):
-        print("Verifying the integrity of installed modules...\n")
-        subprocess.run(f"pip check")
+        Check: str = args[1]
+        
+        if Check == "pip":
+            print("Verifying the integrity of installed modules...\n")
+            subprocess.run(f"pip check")
+        elif Check == "pmi":
+            VerifyInstallation()
+        else:
+            Error("Erroneous argument #1 \"check\"! (Must be either \"pip\" or \"pmi\")")
     
     def update(*args):
         if args[1] == "--force" or args[1] == "-f":
