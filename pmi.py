@@ -422,6 +422,7 @@ def VerifyInstallation(ForceIfBroken: bool = False, Silent: bool = False):
             print(f"\t| checking \"{Fore.LIGHTBLUE_EX}{name}{Fore.RESET}\": ", end = "")
         try:
             file = open(name, "r")
+            file.close()
         except FileNotFoundError:
             if not Silent:
                 print(f"{Fore.LIGHTRED_EX}Missing!{Fore.RESET}")
