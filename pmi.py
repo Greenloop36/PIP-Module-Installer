@@ -139,7 +139,7 @@ ClearWindow()
 wait(0.1)
 if len(init_modules_to_install) > 0:
 
-    if len(sys.argv) >= 1:
+    if len(sys.argv) >= 2:
         Quit(f"PIP Module Installer is not configured correctly. Please run it manually before running commands via arguments.\n\n({len(sys.argv)} command(s) were voided)")
 
     print(f"\nThe required modules will now be installed automatically.")
