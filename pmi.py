@@ -296,10 +296,9 @@ def Warning(Message: str):
 def CustomException(Message: str):
     print(Fore.LIGHTRED_EX + str(Message) + Fore.RESET)
 
-def PrintList(List: list):
-
+def PrintList(List: list = []):
     if len(List) == 0:
-        print("\t| None")
+        print(f"\t| {Fore.RED}None{Fore.RESET}")
         return
 
     for i in List:
