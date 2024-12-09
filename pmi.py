@@ -791,6 +791,8 @@ class Container_Commands:
         
         print()
 
+Commands = Container_Commands()
+
 if __name__ == "__main__":
     ## Main
     print("Verifying installation...")
@@ -800,7 +802,6 @@ if __name__ == "__main__":
     print("Checking for updates...")
     IsUpdateAvailable, NewVersion = CheckForUpdates()
 
-    Commands = Container_Commands()
     ClearWindow()
     print(f"PIP Module Installer [Version {ThisVersion}]")
     print(f"Type \"help\" for guidance.\n")
