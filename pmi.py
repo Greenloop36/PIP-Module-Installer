@@ -723,7 +723,7 @@ class Container_Commands:
         if callable(Method):
             try:
                 Method(args[1:])
-            except:
+            except Exception as e:
                 CustomException(f"[DEBUG] An exception occurred whilst running the debugger command {Fore.LIGHTBLUE_EX}{args[1]}{Fore.LIGHTRED_EX}!\n{Fore.RESET}{Style.DIM}{e}{Style.RESET_ALL}")
         else:
             Error("Unknown debugger command. Run \"debug list\" for a list of subcommands.")
@@ -778,54 +778,57 @@ class Container_Commands:
         
         print()
 
-## Main
-print("Verifying installation...")
-IsInstallationCorrupt = VerifyInstallation(False, True)
+if __name__ == "__main__":
+    ## Main
+    print("Verifying installation...")
+    IsInstallationCorrupt = VerifyInstallation(False, True)
 
-SetTitle(Subtitle="checking for updates")
-print("Checking for updates...")
-IsUpdateAvailable, NewVersion = CheckForUpdates()
+    SetTitle(Subtitle="checking for updates")
+    print("Checking for updates...")
+    IsUpdateAvailable, NewVersion = CheckForUpdates()
 
-Commands = Container_Commands()
-ClearWindow()
-print(f"PIP Module Installer [Version {ThisVersion}]")
-print(f"Type \"help\" for guidance.\n")
+    Commands = Container_Commands()
+    ClearWindow()
+    print(f"PIP Module Installer [Version {ThisVersion}]")
+    print(f"Type \"help\" for guidance.\n")
 
-if IsUpdateAvailable:
-    Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
+    if IsUpdateAvailable:
+        Notice(f"An update is available (Version {Fore.LIGHTRED_EX}{ThisVersion}{Fore.RESET} -> {Fore.LIGHTGREEN_EX}{NewVersion}{Fore.RESET})! Run \"update\" to install it.\n")
 
-if IsInstallationCorrupt:
-    Warning(f"Your installation has missing or broken files! Please run \"{Fore.BLUE}verify pmi{Fore.RESET}\" to repair it!\n")
+    if IsInstallationCorrupt:
+        Warning(f"Your installation has missing or broken files! Please run \"{Fore.BLUE}verify pmi{Fore.RESET}\" to repair it!\n")
 
 
-# If commands are specified to PMI, run them all
-_CustomArguments = sys.argv[1:]
-if len(_CustomArguments) > 0:
-    for command in sys.argv:
-        print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
-        ParseCommand(command)
+    # If commands are specified to PMI, run them all
+    _CustomArguments = sys.argv[1:]
+    print(_CustomArguments)
+    if len(_CustomArguments) > 0:
+        for command in _CustomArguments:
+            print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
+            ParseCommand(command)
+            print()
+        
+        if len(sys.argv) == 1:
+            Notice("Completed 1 action.")
+        else:
+            Notice(f"Completed {len(sys.argv)} actions.")
+        
         print()
-    
-    if len(sys.argv) == 1:
-        Notice("Completed 1 action.")
-    else:
-        Notice(f"Completed {len(sys.argv)} actions.")
-    
-    print()
 
-while True:
-    SetTitle()
 
-    ## Input
-    try:
-        #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
-        inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} ")
-    except KeyboardInterrupt:
-        CustomException("\nKeyboard Interruption")
-        Terminate()
-    except EOFError:
-        pass
+    while True:
+        SetTitle()
 
-    ParseCommand(inp)
+        ## Input
+        try:
+            #inp = input(f"{Fore.YELLOW}<{Login}$pmi>{Fore.RESET} ")
+            inp = input(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} ")
+        except KeyboardInterrupt:
+            CustomException("\nKeyboard Interruption")
+            Terminate()
+        except EOFError:
+            pass
 
-    print()
+        ParseCommand(inp)
+
+        print()
