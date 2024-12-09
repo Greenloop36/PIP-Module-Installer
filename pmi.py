@@ -502,9 +502,9 @@ class Container_Debug:
         args = sys.argv
 
         print("Arguments passed to PMI")
-        PrintList()
+        PrintList(args)
         print("\nRecognised arguments:")
-        PrintList(sys.argv[1:])
+        PrintList(args[1:])
 
 Debug = Container_Debug()
 
