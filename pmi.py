@@ -297,6 +297,11 @@ def CustomException(Message: str):
     print(Fore.LIGHTRED_EX + str(Message) + Fore.RESET)
 
 def PrintList(List: list):
+
+    if len(List) == 0:
+        print("\t| None")
+        return
+
     for i in List:
         print("\t| " + str(i))
 
@@ -492,6 +497,14 @@ class Container_Debug:
         ToPrint = [attr for attr in dir(Debug) if callable(getattr(Debug, attr)) and not attr.startswith("__")]
         print(f"list of debug commands:")
         PrintList(ToPrint)
+    
+    def args(*a):
+        args = sys.argv
+
+        print("Arguments passed to PMI")
+        PrintList()
+        print("\nRecognised arguments:")
+        PrintList(sys.argv[1:])
 
 Debug = Container_Debug()
 
@@ -801,7 +814,7 @@ if __name__ == "__main__":
 
     # If commands are specified to PMI, run them all
     _CustomArguments = sys.argv[1:]
-    print(_CustomArguments)
+
     if len(_CustomArguments) > 0:
         for command in _CustomArguments:
             print(f"{Fore.LIGHTGREEN_EX}{Login}@pmi{Fore.MAGENTA} ${Fore.RESET} {command}")
