@@ -571,6 +571,14 @@ class Container_Debug:
         print("\nRecognised arguments:")
         PrintList(args[1:])
 
+    def loglevel(*args):
+        if logger.level == logging.INFO:
+            logger.setLevel(logging.DEBUG)
+            print("Using DEBUG log level.")
+        else:
+            logger.setLevel(logging.INFO)
+            print("Using INFO log level.")
+
 Debug = Container_Debug()
 
 class Container_Commands:
