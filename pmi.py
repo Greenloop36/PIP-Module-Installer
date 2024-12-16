@@ -160,6 +160,14 @@ if len(init_modules_to_install) > 0:
 
 ClearWindow()
 
+if not IsModuleInstalled(required_modules[0]):
+    print("Restarting...")
+
+    try:
+        os.system(f"python \"{__file__}\"")
+    except Exception as e:
+        Quit(f"Failed to restart!\n{e}")
+
 ##########################################
 ## MAIN
 ##########################################
@@ -170,6 +178,7 @@ import colorama
 from colorama import Fore, Back, Style
 import json
 import requests
+import logging
 
 #SetTitle(Subtitle="starting")
 
@@ -273,6 +282,50 @@ DefaultTitle = f"PIP Module Installer [Version {ThisVersion}]"
 ## init
 colorama.init(autoreset = True)
 
+## Logging
+LoggingFormats = {
+    "DEBUG": {
+        "Prefix": f"{Fore.CYAN}debug{Fore.RESET}: "
+    },
+    "INFO": {
+        "Prefix": f"{Fore.MAGENTA}notice{Fore.RESET}: "
+    },
+    "WARNING": {
+        "Prefix": f"{Fore.YELLOW}warning{Fore.RESET}: "
+    },
+    "ERROR": {
+        "Prefix": f"{Fore.RED}error{Fore.RESET}:"
+    },
+    "CRITICAL": {
+        "Prefix": f"{Fore.LIGHTRED_EX}",
+        "Suffix": f"{Fore.RESET}"
+    },
+}
+class ColouredFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        Message = super().format(record)
+        levelname = record.levelname
+        Output = ""
+
+        if levelname in LoggingFormats:
+            CurrentFormat = LoggingFormats[levelname]
+            Prefix = CurrentFormat.get("Prefix", "")
+            Suffix = CurrentFormat.get("Suffix", "")
+
+            Output = f"{Prefix}{Message}{Suffix}"
+        else:
+            Output = Message
+
+        return Output
+
+logger = logging.getLogger("pmi")
+logger.setLevel(logging.INFO)
+
+ConsoleHandler = logging.StreamHandler()
+formatter = ColouredFormatter('%(message)s')
+ConsoleHandler.setFormatter(formatter)
+logger.addHandler(ConsoleHandler)
+
 ## functions
 def GetCommandFromAlias(Alias: str):
     for Command, ListOfAliases in CommandAliases.items():
@@ -282,19 +335,26 @@ def GetCommandFromAlias(Alias: str):
     return False, None
 
 def Error(Message: str):
-    print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
+    # print(Fore.RED + "error" + Fore.RESET + ": " + str(Message))
+    logger.error(Message)
 
 def PrintSuccess(Message: str):
     print(Fore.LIGHTGREEN_EX + "success" + Fore.RESET + ": " + str(Message))
 
 def Notice(Message: str):
-    print(Fore.MAGENTA + "notice" + Fore.RESET + ": " + str(Message))
+    # print(Fore.MAGENTA + "notice" + Fore.RESET + ": " + str(Message))
+    logger.info(Message)
 
 def Warning(Message: str):
-    print(Style.BRIGHT + Fore.YELLOW + "warning" + Fore.RESET + Style.RESET_ALL + ": " + str(Message))
+    # print(Style.BRIGHT + Fore.YELLOW + "warning" + Fore.RESET + Style.RESET_ALL + ": " + str(Message))
+    logger.warning(Message)
 
 def CustomException(Message: str):
-    print(Fore.LIGHTRED_EX + str(Message) + Fore.RESET)
+    # print(Fore.LIGHTRED_EX + str(Message) + Fore.RESET)
+    logger.critical(Message)
+
+def LogDebug(Container: str, Message: str):
+    logger.debug(f"[{Fore.LIGHTBLUE_EX}{Container}{Fore.RESET}]> {Message}")
 
 def PrintList(List: list = []):
     if len(List) == 0:
@@ -305,13 +365,17 @@ def PrintList(List: list = []):
         print("\t| " + str(i))
 
 def GetFileFromRepo(FileName) -> tuple[bool, str]:
+    LogDebug("GetFileFromRepo", f"Retrieving \"{FileName}\" from {Fore.BLUE}{BaseURL}{Fore.RESET}")
     Response = requests.get(BaseURL +  FileName)
 
     if Response.status_code == 200: # Success
+        LogDebug("GetFileFromRepo", f"\t| HTTP 200")
         return True, Response.text
     else: # Failure
+        Message = f"HTTP {Response.status_code} ({Response.reason})"
         #print(Response)
-        return False, f"HTTP {Response.status_code} ({Response.reason})"
+        LogDebug("GetFileFromRepo", f"\t| Failed! {Message}")
+        return False, Message
 
 def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update is available) OR False (if no update or if GET failed)
     Success, Result = GetFileFromRepo("Version.txt")
@@ -323,6 +387,7 @@ def CheckForUpdates() -> tuple[bool, str | None]: ## True, NewVersion (if update
         else:
             return True, Result
     else:
+        LogDebug(f"CheckForUpdates", f"Retrieval failed!")
         return False, None
 
 def Terminate(): # User initiated exits
@@ -349,6 +414,7 @@ def Update(Force: bool = False):
     print("Preparing to update...")
 
     ## Get latest version
+    LogDebug(f"", f"")
     Success, Result = GetFileFromRepo("Version.txt")
     LatestVersion = Result.replace("\n", "")
 
@@ -504,6 +570,14 @@ class Container_Debug:
         PrintList(args)
         print("\nRecognised arguments:")
         PrintList(args[1:])
+
+    def loglevel(*args):
+        if logger.level == logging.INFO:
+            logger.setLevel(logging.DEBUG)
+            print("Using DEBUG log level.")
+        else:
+            logger.setLevel(logging.INFO)
+            print("Using INFO log level.")
 
 Debug = Container_Debug()
 
