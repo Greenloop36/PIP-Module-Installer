@@ -10,6 +10,7 @@ ThisVersion = "2.3"
 ### init
 print("initialising...")
 import sys
+import importlib.util
 import subprocess
 import os
 import webbrowser
@@ -51,18 +52,12 @@ def InstallModule(Name: str) -> tuple[bool, str, int]:
         return False, result.stderr, result.returncode
 
 def IsModuleInstalled(Name: str) -> bool:
-    a = None
-    Installed: bool = None
-
-    try:
-        a = __import__(Name)
-    except ModuleNotFoundError:
-        Installed = False
+    if Name in sys.modules:
+        return True
+    elif importlib.util.find_spec(Name) != None:
+        return True
     else:
-        Installed = True
-    finally:
-        a = None
-        return Installed
+        return False
 
 def ClearWindow() -> None:
     os.system("cls")
